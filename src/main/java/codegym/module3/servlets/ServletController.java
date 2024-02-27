@@ -1,8 +1,11 @@
 package codegym.module3.servlets;
 
+import codegym.module3.models.Question;
+import codegym.module3.services.QuestionsQuestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,31 +17,47 @@ public class ServletController extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(ServletController.class);
 
+    private QuestionsQuestService questionsQuestService;
+
+    public ServletController() {
+        questionsQuestService = new QuestionsQuestService();
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         HttpSession session = req.getSession();
 
-        if( req.getParameter("challengeDecision")!= null){
+        String lastQuestion = (String) session.getAttribute("lastQuestion");
+        String response = req.getParameter("playerResponse");
 
-            if( Boolean.getBoolean(req.getParameter("challengeDecision"))){
-                logger.info("Challenge accepted by " + session.getAttribute("playerName"));
-            }else {
-                logger.info("Challenge rejected by " + session.getAttribute("playerName"));
-            }
+        if(response == null){
+            String destination = "index.jsp";
+            RequestDispatcher requestDispatcher = req.getRequestDispatcher(destination);
+
+            session.removeAttribute("lastQuestion");
+            requestDispatcher.forward(req, resp);
+
+            return;
         }
 
-        String lastQuestion = (String)session.getAttribute("lastQuestion");
-
-        if(lastQuestion == null){
-
+        if (lastQuestion == null) {
+            lastQuestion = "AcceptChallenge";
         }
 
+        logger.info("Received response {} to question {}", response, lastQuestion);
 
-        String response = req.getParameter("response");
+        String nextQuestionId = questionsQuestService.processPlayerResponse(lastQuestion, response);
 
+        session.setAttribute("lastQuestion", nextQuestionId);
 
+        logger.info("Next question is: " + nextQuestionId);
 
-        logger.info("Request made to ServletController");
+        String destination = "game/game.jsp";
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher(destination);
+
+        req.setAttribute("nextQuestion", questionsQuestService.getQuestionById(nextQuestionId));
+
+        requestDispatcher.forward(req, resp);
     }
 }

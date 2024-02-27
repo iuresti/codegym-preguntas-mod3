@@ -16,5 +16,6 @@
     <input type="text" id="playerName" name="playerName">
     <button type="submit">Empezar Juego</button>
 </form>
+<% session.removeAttribute("lastQuestion"); %>
 </body>
 </html>

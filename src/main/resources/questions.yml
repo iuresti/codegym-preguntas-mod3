@@ -1,4 +1,10 @@
 questions:
+  "AcceptChallenge":
+    "label": "Has perdido la memoria"
+    "question": "¿Aceptas continuar el juego?"
+    "answers":
+      "Si": "ChallengeAccepted"
+      "No": "RejectNegociations"
   "ChallengeAccepted":
     "label": "Aceptaste el reto"
     "question": "Vas a ir al puente del capitán"
