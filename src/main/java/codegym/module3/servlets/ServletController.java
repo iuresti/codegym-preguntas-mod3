@@ -32,6 +32,7 @@ public class ServletController extends HttpServlet {
         String response = req.getParameter("playerResponse");
 
         if(response == null){
+            logger.warn("No response received, redirected to index.jsp");
             String destination = "index.jsp";
             RequestDispatcher requestDispatcher = req.getRequestDispatcher(destination);
 
@@ -47,11 +48,13 @@ public class ServletController extends HttpServlet {
 
         logger.info("Received response {} to question {}", response, lastQuestion);
 
-        String nextQuestionId = questionsQuestService.processPlayerResponse(lastQuestion, response);
+        String nextQuestionId = questionsQuestService.processPlayerResponse(lastQuestion, response).orElseThrow();
 
         session.setAttribute("lastQuestion", nextQuestionId);
 
         logger.info("Next question is: " + nextQuestionId);
+
+        logger.debug("Entrada en modo debug");
 
         String destination = "game/game.jsp";
         RequestDispatcher requestDispatcher = req.getRequestDispatcher(destination);
